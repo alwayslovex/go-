@@ -17,6 +17,20 @@ func httpGet(url string) string{
 	resu,_ := ioutil.ReadAll(res.Body)
 	return string(resu)
 }
+func httpPostJson(url string,kv map[string]string) string{
+	body,err := json.Marshal(kv)
+	if err != nil{
+		return ""
+	}
+	rw := bytes.NewReader(body)
+	resp , err := http.Post(url,"Application/json",rw)
+	if err != nil{
+		fmt.Printf("error = %s",err.Error())
+		return ""
+	}
+	b,_ := ioutil.ReadAll(resp.Body)
+	return string(b)
+}
 
 func main(){
 	fmt.Println(httpGet("http://www.baidu.com"))
