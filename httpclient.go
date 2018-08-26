@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"fmt"
 	"io/ioutil"
+	"encoding/json"
+	"bytes"
 )
 
 func httpGet(url string) string{
@@ -34,4 +36,9 @@ func httpPostJson(url string,kv map[string]string) string{
 
 func main(){
 	fmt.Println(httpGet("http://www.baidu.com"))
+	mp:=make(map[string]string,0)
+	mp["name"] = "ita"
+	mp["age"] = "24"
+	mp["basic_info"] = "no girl friend"
+	fmt.Println(httpPostJson("http://localhost:7890/postjson",mp))
 }
