@@ -166,7 +166,7 @@ func input_nums() (arr []int){
 
 func main() {
 	//arr_int := []int{4,1,2,5,0,3,9,7}
-	arr_int := input_nums()
+	arr_int := input_nums()//ctrl + D end input
 	print_arr(arr_int)
 	fmt.Printf("---------------\n")
 	//bubble_sort(arr_int)
