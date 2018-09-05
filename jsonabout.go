@@ -5,7 +5,15 @@ import (
 	"encoding/json"
 	"reflect"
 )
+type UserInfo struct{
+	Userid string
+	Passwd string
+}
 
+type UserInfo2 struct{
+	Userid string `json:"userid"`
+	Passwd string `json:"passwd"`
+}
 func main(){
 	var f interface{}
 	jsonstr := []byte(`{"name":"ita","age":24,"fav":["game","ball"],"friend":[{"age":25,"name":"abc"}]}`)
@@ -26,4 +34,12 @@ func main(){
 			fmt.Println(k, "is of a type I don't know how to handle")
 		}
 	}
+
+	itachi := UserInfo{"itachi","123456"}
+	b ,_ := json.Marshal(itachi)
+	fmt.Println(b)  //{"Userid":"itachi","Passwd":"123456"}
+	
+	itachi2 := UserInfo2{"itachi","123456"}
+	b,_ = json.Marshal(itachi2)
+	fmt.Println(b) //{"userid":"itachi","passwd":"123456"}
 }
