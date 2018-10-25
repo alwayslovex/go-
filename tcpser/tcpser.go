@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
+	"time"
 )
 
 func main() {
@@ -11,6 +13,7 @@ func main() {
 	if err != nil {
 		log.Fatal("error : ", err)
 	}
+	//go clientRequest()
 	for {
 		conn, err := lister.Accept()
 		if err != nil {
@@ -35,7 +38,25 @@ func handleconn(conn net.Conn) {
 			continue
 		}
 		ss := string(body[:n])
-		fmt.Printf("body %s: ,num : %d", ss, n)
-		conn.Write(body)
+		fmt.Printf("body %s: ,num : %d\n", ss, n)
+		conn.Write(body[0:n])
 	}
+}
+
+func clientRequest() {
+	time.Sleep(3 * time.Second)
+	for i := 0; i < 100; i++ {
+		go doReq(i)
+	}
+}
+func doReq(i int) {
+	conn, err := net.Dial("tcp", "localhost:8090")
+	if err != nil {
+		fmt.Println(err)
+	}
+	conn.Write([]byte("hello" + strconv.Itoa(i)))
+	var body [10]byte
+	n, _ := conn.Read(body[:10])
+	conn.Close()
+	fmt.Println(string(body[:n]))
 }
