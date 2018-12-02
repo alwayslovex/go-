@@ -61,11 +61,14 @@ func (ms *ManagerSingleton) getInstance() *Manager {
 }
 
 var manager ManagerSingleton
+var wg sync.WaitGroup
 
 func main() {
 	fmt.Println("start")
 	manager.getInstance().Init()
+
 	go manager.getInstance().PrintName()
+	wg.Add(4)
 	go manager.getInstance().PrintName()
 	go func() {
 		for i := 0; i < 10; i++ {
@@ -78,6 +81,11 @@ func main() {
 		}
 
 	}()
+	go func() {
+		wg.Done()
+		wg.Add(-3)
+	}()
+	wg.Wait()
 	time.Sleep(10 * time.Second)
 
 }
