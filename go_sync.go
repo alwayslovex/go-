@@ -87,5 +87,4 @@ func main() {
 	}()
 	wg.Wait()
 	time.Sleep(10 * time.Second)
-
 }
