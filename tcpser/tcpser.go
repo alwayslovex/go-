@@ -27,8 +27,7 @@ func main() {
 func handleconn(conn net.Conn) {
 	defer conn.Close()
 	for {
-		body := make([]byte, 110)
-
+		body := make([]byte, 110) //注意这里，如果是body := make([]byte,0)那么在read的时候它不会自动增长，而是一直都是0。也就读不到东西。
 		n, err := conn.Read(body)
 		if err != nil {
 			fmt.Print("conn read error : ", err)
