@@ -1,0 +1,22 @@
+#### 如何计算md5
+> 在使用过程中，需要计算md5，于是有了下面的例子
+```
+package main
+
+import (
+    "crypto/md5"
+    "fmt"
+    "encoding/hex"
+)
+
+func main(){
+
+    md5Ctx := md5.New()
+    md5Ctx.Write([]byte("test"))
+    cStr := md5Ctx.Sum(nil)//MD5来说就是一个128bit的16字节byte数组
+    fmt.Print(cStr)
+    fmt.Print("\n")
+    fmt.Print(hex.EncodeToString(cStr))//所以需要这里进行编码成16进制的字符串
+}
+```
+

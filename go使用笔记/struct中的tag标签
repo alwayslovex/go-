@@ -1,0 +1,15 @@
+#### 结构体中的标签
+在使用json的时候需要用到tag
+```
+type Student struct{
+    Name string `json:"name"`,
+    Age int `json:"age"`
+}
+```
+因为我用了toml的格式的配置文件所以，需要在结构体中增加一个tag，以前没有用过多tag。
+```
+type Student struct{
+    Name string `json:"name" toml:"tname"`,
+    Age string `json:"age" toml:"tage"`
+}
+```
