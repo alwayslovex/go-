@@ -1,12 +1,19 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
+	"time"
 )
+
+//http server的简单示例
 
 func echoHandle(w http.ResponseWriter, r *http.Request) {
 	_, err := ioutil.ReadAll(r.Body)
@@ -67,6 +74,32 @@ func httpServ() {
 	http.ListenAndServe("localhost:7890", nil)
 }
 
+//接收信号，然后完美退出程序
+func httpServ2() {
+	http.HandleFunc("/echo", echoHandle)
+	ser := &http.Server{Addr: "localhost:7890", Handler: nil}
+	ch := make(chan os.Signal, 2) //注意这里，根据使用信号包的要求，这里的channel必须要有buff。否则会有问题（信号无法处理）
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+	go func() {
+		for {
+			select {
+			case <-ch:
+				ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
+				_ = ser.Shutdown(ctx)
+				fmt.Println("shutdown")
+				return
+			default:
+				fmt.Println("normal")
+				time.Sleep(time.Second)
+			}
+		}
+	}()
+	fmt.Println("start ")
+	_ = ser.ListenAndServe()
+
+}
+
 func main() {
-	httpServ()
+	//httpServ()
+	httpServ2()
 }
