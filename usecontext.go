@@ -14,10 +14,12 @@ import (
 
 var n = 0
 
-func Count(ctx context.Context){
-	for{
+func Count(ctx context.Context, wg *sync.WaitGroup) {
+	for {
 		select {
-		case <- ctx.Done():
+		case <-ctx.Done():
+			fmt.Println("done")
+			wg.Done()
 			return
 		default:
 			n++
@@ -26,12 +28,18 @@ func Count(ctx context.Context){
 	}
 }
 
-func main(){
+func main() {
 	wg := sync.WaitGroup{}
-	ctx := context.WithValue(context.Background(),string("wg"),wg);
-	go Count(ctx)
-
-	time.Sleep(5*time.Second)
+	ctx, cancelfunc := context.WithCancel(context.Background())
+	wg.Add(1)
+	go Count(ctx, &wg)
+	time.Sleep(1 * time.Second)
+	cancelfunc()
 	fmt.Println(n)
-	
+
+	ctx2, canc := context.WithTimeout(context.Background(), time.Second*10) //这里的是设置了一个自动超时的context，如果超时了，则自动调用cancel
+	wg.Add(1)
+	go Count(ctx2, &wg)
+	canc()
+	wg.Wait()
 }
