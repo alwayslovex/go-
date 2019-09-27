@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"sync"
+	"time"
 )
 
 func httpGet(url string) string {
@@ -32,6 +35,42 @@ func httpPostJson(url string, kv map[string]string) string {
 	}
 	b, _ := ioutil.ReadAll(resp.Body)
 	return string(b)
+}
+
+//
+//以下是自定义，普通的http客户端，也就是不实用默认的，使用了once来实现了单例模式。
+var httpClient *http.Client
+var once sync.Once
+
+func GetHttpClient() *http.Client {
+	once.Do(func() {
+		if httpClient == nil {
+			httpClient = new(http.Client)
+			httpClient.Timeout = time.Minute * 2
+		}
+	})
+	return httpClient
+}
+func SendJsonHttpPost(url string, body io.Reader) (resp *http.Response, err error) {
+	resp, err = GetHttpClient().Post(url, "application/json", body)
+	return
+}
+
+//用于禁止跳转的http客户端
+var authHttpClient *http.Client
+var authOnce sync.Once
+
+func GetAuthHttpClient() *http.Client {
+	authOnce.Do(func() {
+		if authHttpClient == nil {
+			authHttpClient = new(http.Client)
+			authHttpClient.Timeout = time.Minute
+			authHttpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			}
+		}
+	})
+	return authHttpClient
 }
 
 func main() {
