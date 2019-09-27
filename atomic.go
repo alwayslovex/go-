@@ -23,5 +23,6 @@ func main() {
 
 	//v:= atomic.LoadInt32(&age) 原子读取一个数的值
 	//atomic.StoreInt32(&age,10)原子地写入一个值
-	//atomic.SwapInt32(&age,10)原子交换
+	atomic.SwapInt32(&age, 10) //原子交换
+	atomic.CompareAndSwapInt32(&age, 3, 0)
 }
