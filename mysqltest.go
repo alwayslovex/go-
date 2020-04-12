@@ -36,6 +36,38 @@ func (op *MMysql) Init(name, user, pass, host string, port int) bool {
 	op.dbuser = user
 	return op.init()
 }
+
+//DB查询,返回一个[]map[string]interface{}
+func (op *MMysql) QueryRecords(sqlstr string, query_results *[]map[string]interface{}, args ...interface{}) error {
+	rows, err := op.conn_.Query(sqlstr, args...)
+	if err == nil {
+		defer rows.Close()
+		columns, err := rows.Columns() //列名
+		if err != nil {
+			return err
+		}
+		values := make([]interface{}, len(columns))
+		scanArags := make([]interface{}, len(values))
+		for i := range values {
+			scanArags[i] = &values[i]
+		}
+		for rows.Next() {
+			err = rows.Scan(scanArags...)
+			if err != nil {
+				return err
+			}
+			item := make(map[string]interface{}, len(values))
+
+			for i, col := range values { //列名对应的值
+				item[columns[i]] = col
+			}
+			*query_results = append(*query_results, item)
+		}
+	} else {
+		return err
+	}
+	return nil
+}
 func (op *MMysql) QueryRecord(sqlstr string, query_results *[]map[string]string) int {
 	var row_size = 0
 	//println(sqlstr)

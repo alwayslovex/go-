@@ -88,9 +88,6 @@ func httpServ2() {
 				_ = ser.Shutdown(ctx)
 				fmt.Println("shutdown")
 				return
-			default:
-				fmt.Println("normal")
-				time.Sleep(time.Second)
 			}
 		}
 	}()

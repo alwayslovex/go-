@@ -1,12 +1,9 @@
-package main
+package aesencry
 
 import (
-	"bufio"
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
-	"fmt"
-	"os"
 )
 
 //开发过程中,遇到了,使用c++ openssl库来进行aes-gcm 128位进行加密.然后将加密后的内容,传输给go服务.
@@ -36,6 +33,46 @@ func DecryptContent(encryKey, Content, Mac, Iv string) (string, error) {
 
 	contentAndMAc := append(content, mac...) //这里进行了拼接.
 	decodeContent, err := aesGcm.Open(nil, []byte(Iv), contentAndMAc, nil)
+	return string(decodeContent), err
+}
+
+//自己常用的加解密
+// plaintext 明文
+// encryKey 密钥
+func AesEncrypt(plaintext, encryKey []byte, Iv string) (string, error) {
+	block, err := aes.NewCipher(encryKey)
+	if err != nil {
+		return "", err
+	}
+	aesGcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	res := aesGcm.Seal(nil, []byte(Iv), plaintext, nil)
+
+	return hex.EncodeToString(res), nil
+
+}
+
+//使用上面的方式加密，后改函数解密
+func DecryptContent2(encryKey, Content, Iv string) (string, error) {
+	//开始解密
+	block, err := aes.NewCipher([]byte(encryKey))
+	if err != nil {
+		return "", err
+	}
+
+	aesGcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	content, err := hex.DecodeString(Content) //由于将密文转换成了16进制字符.所以这里要转回去.
+	if err != nil {
+		return "", err
+	}
+	decodeContent, err := aesGcm.Open(nil, []byte(Iv), content, nil)
 	return string(decodeContent), err
 }
 
