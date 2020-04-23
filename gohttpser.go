@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -94,6 +95,61 @@ func httpServ2() {
 	fmt.Println("start ")
 	_ = ser.ListenAndServe()
 
+}
+
+//http 自定义服务器
+type HttpServer struct {
+	ser          http.Server
+	mux          *http.ServeMux
+	closeTimeout time.Duration
+	isRunning    bool
+}
+
+//初始化，监听地址和关闭超时时间
+func (hts *HttpServer) Init(addr string, duration time.Duration) {
+	hts.ser.Addr = addr
+	hts.closeTimeout = duration
+}
+
+//设置路由和处理函数
+func (hts *HttpServer) SetMux(pattern map[string]http.HandlerFunc) {
+	if hts.mux == nil {
+		hts.mux = http.NewServeMux()
+	}
+	for k, v := range pattern {
+		hts.mux.HandleFunc(k, v)
+	}
+}
+
+//启动服务器，阻塞
+func (hts *HttpServer) Start() error {
+	if hts.mux == nil {
+		return errors.New("not set mux")
+	}
+	hts.isRunning = true
+	hts.ser.Handler = hts.mux
+	return hts.ser.ListenAndServe()
+}
+
+//启动服务器，非阻塞
+func (hts *HttpServer) StartWithOutBlock() {
+	hts.ser.Handler = hts.mux
+	go hts.ser.ListenAndServe()
+}
+
+//停止服务器
+func (hts *HttpServer) Stop() {
+	if !hts.isRunning {
+		return
+	}
+	ctx, cancelFun := context.WithTimeout(context.Background(), hts.closeTimeout)
+	defer cancelFun()
+	_ = hts.ser.Shutdown(ctx)
+}
+
+//设置ser
+func (hts *HttpServer) SetSerConfig(ser *http.Server) {
+	hts.ser = *ser
 }
 
 func main() {
